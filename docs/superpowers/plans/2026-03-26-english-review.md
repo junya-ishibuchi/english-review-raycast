@@ -8,7 +8,7 @@
 
 **Tech Stack:** Raycast Extension API, TypeScript, Anthropic Claude API (`@anthropic-ai/sdk`), Node.js `fs`, macOS launchd
 
-**Project Directory:** `/Users/ji/Programming/english-review/`
+**Project Directory:** `~/Programming/english-review/`
 
 **iCloud Drive Base:** `$HOME/Library/Mobile Documents/com~apple~CloudDocs/EnglishReview/`
 
@@ -205,7 +205,7 @@ export interface CategoriesData {
 Create a 512x512 PNG at `assets/icon.png`. For now, use any solid-color square image. You can generate one with:
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 mkdir -p assets
 sips -z 512 512 --setProperty format png /System/Library/Desktop\ Pictures/*.heic --out assets/icon.png 2>/dev/null || python3 -c "
 from PIL import Image
@@ -219,7 +219,7 @@ If neither works, create `assets/icon.png` as any 512x512 PNG.
 - [ ] **Step 5: Install dependencies**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 npm install
 ```
 
@@ -228,7 +228,7 @@ Expected: `node_modules/` created, `package-lock.json` generated, no errors.
 - [ ] **Step 6: Commit**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 git init
 echo "node_modules/\ndist/\n.DS_Store" > .gitignore
 git add .
@@ -373,7 +373,7 @@ export { ICLOUD_BASE, DATA_DIR, DAILY_DIR, WEEKLY_DIR, ASSETS_DIR };
 - [ ] **Step 2: Verify the module compiles**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 npx tsc --noEmit src/lib/storage.ts
 ```
 
@@ -382,7 +382,7 @@ Expected: No errors.
 - [ ] **Step 3: Commit**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 git add src/lib/storage.ts
 git commit -m "feat: add storage layer for JSON on iCloud Drive"
 ```
@@ -500,7 +500,7 @@ export async function callClaude(type: RecordType, input: string): Promise<Claud
 - [ ] **Step 3: Verify compilation**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 npx tsc --noEmit
 ```
 
@@ -509,7 +509,7 @@ Expected: No errors.
 - [ ] **Step 4: Commit**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 git add src/lib/claude.ts src/lib/prompts.ts
 git commit -m "feat: add Claude API client and prompt templates"
 ```
@@ -630,7 +630,7 @@ ${analysis.difficulty}`;
 - [ ] **Step 2: Run in development mode and test manually**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 npm run dev
 ```
 
@@ -642,7 +642,7 @@ Open Raycast, search for "Translate". Enter a Japanese phrase (e.g., "その件�
 - [ ] **Step 3: Commit**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 git add src/translate.tsx
 git commit -m "feat: add Translate command (JP -> EN with auto-record)"
 ```
@@ -769,7 +769,7 @@ With `npm run dev` still running, search for "Correct" in Raycast. Enter an Engl
 - [ ] **Step 3: Commit**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 git add src/correct.tsx
 git commit -m "feat: add Correct command (English correction with auto-record)"
 ```
@@ -895,7 +895,7 @@ Search for "Explain" in Raycast. Enter an expression (e.g., "break the ice"). Ve
 - [ ] **Step 3: Commit**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 git add src/explain.tsx
 git commit -m "feat: add Explain command (English expression explanation with auto-record)"
 ```
@@ -1021,7 +1021,7 @@ Search for "Confirm" in Raycast. Enter text (e.g., "Let's circle back on this").
 - [ ] **Step 3: Commit**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 git add src/confirm.tsx
 git commit -m "feat: add Confirm command (understanding confirmation with auto-record)"
 ```
@@ -1471,7 +1471,7 @@ EOF
 Then run the generator:
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 npx tsx scripts/generate-daily.ts 2026-03-25
 ```
 
@@ -1488,7 +1488,7 @@ Verify: Dark-themed page with two record cards, properly styled.
 - [ ] **Step 6: Commit**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 git add scripts/
 git commit -m "feat: add daily HTML review generator with dark theme"
 ```
@@ -1811,7 +1811,7 @@ main().catch((err) => {
 - [ ] **Step 3: Test the weekly generator**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 npx tsx scripts/generate-weekly.ts 2026-03-25
 ```
 
@@ -1828,7 +1828,7 @@ Verify: Category bar chart, top mistakes list, all records displayed.
 - [ ] **Step 4: Commit**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 git add scripts/templates/weekly.html scripts/generate-weekly.ts
 git commit -m "feat: add weekly HTML review generator with category charts"
 ```
@@ -1856,10 +1856,10 @@ Create `launchd/com.english-review.daily.plist`:
     <array>
         <string>/usr/local/bin/npx</string>
         <string>tsx</string>
-        <string>/Users/ji/Programming/english-review/scripts/generate-daily.ts</string>
+        <string>~/Programming/english-review/scripts/generate-daily.ts</string>
     </array>
     <key>WorkingDirectory</key>
-    <string>/Users/ji/Programming/english-review</string>
+    <string>~/Programming/english-review</string>
     <key>StartCalendarInterval</key>
     <dict>
         <key>Hour</key>
@@ -1895,10 +1895,10 @@ Create `launchd/com.english-review.weekly.plist`:
     <array>
         <string>/usr/local/bin/npx</string>
         <string>tsx</string>
-        <string>/Users/ji/Programming/english-review/scripts/generate-weekly.ts</string>
+        <string>~/Programming/english-review/scripts/generate-weekly.ts</string>
     </array>
     <key>WorkingDirectory</key>
-    <string>/Users/ji/Programming/english-review</string>
+    <string>~/Programming/english-review</string>
     <key>StartCalendarInterval</key>
     <dict>
         <key>Weekday</key>
@@ -1934,8 +1934,8 @@ If it's not `/usr/local/bin/npx`, update the `ProgramArguments` in both plist fi
 Then install:
 
 ```bash
-cp /Users/ji/Programming/english-review/launchd/com.english-review.daily.plist ~/Library/LaunchAgents/
-cp /Users/ji/Programming/english-review/launchd/com.english-review.weekly.plist ~/Library/LaunchAgents/
+cp ~/Programming/english-review/launchd/com.english-review.daily.plist ~/Library/LaunchAgents/
+cp ~/Programming/english-review/launchd/com.english-review.weekly.plist ~/Library/LaunchAgents/
 launchctl load ~/Library/LaunchAgents/com.english-review.daily.plist
 launchctl load ~/Library/LaunchAgents/com.english-review.weekly.plist
 ```
@@ -1960,7 +1960,7 @@ Expected: Log shows "Generated: ..." or "No records for ...".
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 git add launchd/
 git commit -m "feat: add launchd jobs for daily and weekly HTML generation"
 ```
@@ -1974,7 +1974,7 @@ This task verifies the full flow works from Raycast command through to HTML gene
 - [ ] **Step 1: Start the extension in dev mode**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 npm run dev
 ```
 
@@ -1998,7 +1998,7 @@ Expected: JSON with 4 records, each containing `input`, `output`, `analysis` wit
 - [ ] **Step 4: Generate today's daily HTML**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 npx tsx scripts/generate-daily.ts $(date +%Y-%m-%d)
 open "$HOME/Library/Mobile Documents/com~apple~CloudDocs/EnglishReview/daily/$(date +%Y-%m-%d).html"
 ```
@@ -2008,7 +2008,7 @@ Expected: Rich HTML page with all 4 records, properly styled with dark theme, ca
 - [ ] **Step 5: Commit final state**
 
 ```bash
-cd /Users/ji/Programming/english-review
+cd ~/Programming/english-review
 git add -A
 git commit -m "feat: complete English Review Tool MVP"
 ```
