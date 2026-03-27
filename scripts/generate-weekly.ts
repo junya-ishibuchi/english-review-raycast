@@ -15,7 +15,7 @@ import { homedir } from "os";
 
 // ---------- Inline types (no Raycast imports) ----------
 
-type RecordType = "translation" | "correction" | "explanation" | "confirmation";
+type RecordType = "translation" | "correction" | "toJapanese";
 type Difficulty = "basic" | "intermediate" | "advanced";
 
 interface Analysis {

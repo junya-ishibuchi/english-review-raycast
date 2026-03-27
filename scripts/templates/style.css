@@ -14,8 +14,7 @@
   /* Record type border colors */
   --correction-border: #e74c3c;
   --translation-border: #4ecca3;
-  --explanation-border: #3498db;
-  --confirmation-border: #f39c12;
+  --toJapanese-border: #3498db;
 
   /* Tag colors */
   --tag-grammar: #e74c3c;
@@ -117,12 +116,8 @@ h1 {
   border-left-color: var(--translation-border);
 }
 
-.record-card.explanation {
-  border-left-color: var(--explanation-border);
-}
-
-.record-card.confirmation {
-  border-left-color: var(--confirmation-border);
+.record-card.toJapanese {
+  border-left-color: var(--toJapanese-border);
 }
 
 .record-card .record-type {
@@ -136,8 +131,7 @@ h1 {
 
 .record-card.correction .record-type { color: var(--correction-border); }
 .record-card.translation .record-type { color: var(--translation-border); }
-.record-card.explanation .record-type { color: var(--explanation-border); }
-.record-card.confirmation .record-type { color: var(--confirmation-border); }
+.record-card.toJapanese .record-type { color: var(--toJapanese-border); }
 
 .record-card .input {
   font-size: 0.95rem;

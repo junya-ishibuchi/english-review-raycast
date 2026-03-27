@@ -15,7 +15,7 @@ import { homedir } from "os";
 
 // ---------- Inline types (no Raycast imports) ----------
 
-type RecordType = "translation" | "correction" | "explanation" | "confirmation";
+type RecordType = "translation" | "correction" | "toJapanese";
 type Difficulty = "basic" | "intermediate" | "advanced";
 
 interface Analysis {
@@ -176,8 +176,7 @@ async function main(): Promise<void> {
   const count = records.length;
   const correctionCount = records.filter((r) => r.type === "correction").length;
   const translationCount = records.filter((r) => r.type === "translation").length;
-  const explanationCount = records.filter((r) => r.type === "explanation").length;
-  const confirmationCount = records.filter((r) => r.type === "confirmation").length;
+  const toJapaneseCount = records.filter((r) => r.type === "toJapanese").length;
 
   // Render records HTML
   let recordsHtml: string;
@@ -208,8 +207,7 @@ async function main(): Promise<void> {
     .replace(/\{\{count\}\}/g, String(count))
     .replace(/\{\{correctionCount\}\}/g, String(correctionCount))
     .replace(/\{\{translationCount\}\}/g, String(translationCount))
-    .replace(/\{\{explanationCount\}\}/g, String(explanationCount))
-    .replace(/\{\{confirmationCount\}\}/g, String(confirmationCount))
+    .replace(/\{\{toJapaneseCount\}\}/g, String(toJapaneseCount))
     .replace(/\{\{records\}\}/g, recordsHtml);
 
   // Write output HTML

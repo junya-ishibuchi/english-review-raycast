@@ -17,10 +17,8 @@ declare namespace Preferences {
   export type Translate = ExtensionPreferences & {}
   /** Preferences accessible in the `correct` command */
   export type Correct = ExtensionPreferences & {}
-  /** Preferences accessible in the `explain` command */
-  export type Explain = ExtensionPreferences & {}
-  /** Preferences accessible in the `confirm` command */
-  export type Confirm = ExtensionPreferences & {}
+  /** Preferences accessible in the `to-japanese` command */
+  export type ToJapanese = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -28,9 +26,7 @@ declare namespace Arguments {
   export type Translate = {}
   /** Arguments passed to the `correct` command */
   export type Correct = {}
-  /** Arguments passed to the `explain` command */
-  export type Explain = {}
-  /** Arguments passed to the `confirm` command */
-  export type Confirm = {}
+  /** Arguments passed to the `to-japanese` command */
+  export type ToJapanese = {}
 }
 

@@ -10,17 +10,17 @@ type State = { mode: "loading" } | { mode: "form" } | { mode: "result"; markdown
 async function run(input: string, setState: (s: State) => void) {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Translating..." });
   try {
-    const { result: output } = await callFast("translation", input);
+    const { result: output } = await callFast("toJapanese", input);
     await Clipboard.copy(output);
     setState({ mode: "result", markdown: output, output });
     toast.style = Toast.Style.Success;
     toast.title = "Translated & copied";
 
-    analyzeInBackground("translation", input, output)
+    analyzeInBackground("toJapanese", input, output)
       .then((analysis) => {
         const record: LearningRecord = {
           id: randomUUID(),
-          type: "translation",
+          type: "toJapanese",
           input,
           output,
           analysis,
@@ -38,7 +38,7 @@ async function run(input: string, setState: (s: State) => void) {
   }
 }
 
-export default function TranslateCommand() {
+export default function ToJapaneseCommand() {
   const [state, setState] = useState<State>({ mode: "loading" });
   const launched = useRef(false);
 
@@ -70,7 +70,7 @@ export default function TranslateCommand() {
         actions={
           <ActionPanel>
             <Action.SubmitForm
-              title="Translate"
+              title="Translate to Japanese"
               onSubmit={async (values: { input: string }) => {
                 if (!values.input.trim()) {
                   await showToast({ style: Toast.Style.Failure, title: "Input is empty" });
@@ -82,7 +82,7 @@ export default function TranslateCommand() {
           </ActionPanel>
         }
       >
-        <Form.TextArea id="input" title="Japanese" placeholder="翻訳したい日本語を入力..." />
+        <Form.TextArea id="input" title="English" placeholder="翻訳したい英文を入力..." />
       </Form>
     );
   }

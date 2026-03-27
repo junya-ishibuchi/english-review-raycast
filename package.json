@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "translate",
-      "title": "Translate",
+      "title": "English",
       "description": "Translate Japanese to English",
       "mode": "view"
     },
@@ -21,15 +21,9 @@
       "mode": "view"
     },
     {
-      "name": "explain",
-      "title": "Explain",
-      "description": "Explain an English expression",
-      "mode": "view"
-    },
-    {
-      "name": "confirm",
-      "title": "Confirm",
-      "description": "Confirm my understanding of English",
+      "name": "to-japanese",
+      "title": "Nihongo",
+      "description": "Translate English to Japanese",
       "mode": "view"
     }
   ],

@@ -1,4 +1,4 @@
-export type RecordType = "translation" | "correction" | "explanation" | "confirmation";
+export type RecordType = "translation" | "correction" | "toJapanese";
 
 export type Difficulty = "basic" | "intermediate" | "advanced";
 

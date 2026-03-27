@@ -4,23 +4,20 @@ export function buildResultPrompt(type: RecordType, input: string): string {
   const typeSpecific: Record<RecordType, string> = {
     translation: `You are an English language tutor helping a Japanese speaker. Translate the following Japanese text to natural English. If there are multiple ways to say it, show the most natural one.`,
 
-    correction: `You are an English language tutor helping a Japanese speaker. Correct the following English text. If the original is actually correct, say so.`,
+    correction: `You are an English language tutor helping a Japanese speaker. Correct the following English text. Preserve the original sentence structure and style as much as possible — only change what is grammatically wrong or clearly unnatural. However, if the overall phrasing or structure itself is unnatural, feel free to restructure it. Do not force corrections on casual or informal tone — if the user writes casually, that's intentional. If the original is actually correct, say so.`,
 
-    explanation: `You are an English language tutor helping a Japanese speaker. Explain what the following English expression means, when it's used, and give 2-3 example sentences. Explain the nuance and register (formal/casual/slang).`,
-
-    confirmation: `You are an English language tutor helping a Japanese speaker. Confirm whether the following English expression is being understood correctly. Point out any nuances that might be missed. Be concise.`,
+    toJapanese: `You are a translator. Translate the following English text to natural Japanese.`,
   };
 
   const prefixes: Record<RecordType, string> = {
     translation: "以下の日本語を自然な英語に翻訳してください:",
     correction: "以下の英文を訂正してください:",
-    explanation: "以下の英語表現の意味を教えてください:",
-    confirmation: "以下の英語表現の理解が合っているか確認してください:",
+    toJapanese: "以下の英語を自然な日本語に翻訳してください:",
   };
 
   return `${typeSpecific[type]}
 
-Respond with ONLY the result text, no JSON, no extra formatting.
+Respond with ONLY the result text, no JSON, no extra formatting. Do not include any explanation.
 
 ${prefixes[type]}
 
@@ -31,8 +28,7 @@ export function buildAnalysisPrompt(type: RecordType, input: string, result: str
   const typeLabels: Record<RecordType, string> = {
     translation: "translation (Japanese → English)",
     correction: "English correction",
-    explanation: "English expression explanation",
-    confirmation: "English comprehension confirmation",
+    toJapanese: "translation (English → Japanese)",
   };
 
   return `You are an English language learning analyst helping a Japanese speaker. Analyze the following ${typeLabels[type]} interaction and provide a learning analysis.
