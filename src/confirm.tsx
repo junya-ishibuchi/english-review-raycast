@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Detail, Form, showToast, Toast, Clipboard } from "@raycast/api";
 import { useState } from "react";
-import { callClaude } from "./lib/claude";
+import { callFast, analyzeInBackground } from "./lib/claude";
 import { appendRecord, updateCategories } from "./lib/storage";
-import { LearningRecord, Analysis } from "./lib/types";
+import { LearningRecord } from "./lib/types";
 import { randomUUID } from "crypto";
 
 export default function ConfirmCommand() {
-  const [result, setResult] = useState<{ markdown: string; record: LearningRecord } | null>(null);
+  const [result, setResult] = useState<{ markdown: string; output: string } | null>(null);
 
   if (result) {
     return (
@@ -14,7 +14,7 @@ export default function ConfirmCommand() {
         markdown={result.markdown}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title="Copy Confirmation" content={result.record.output} />
+            <Action.CopyToClipboard title="Copy Confirmation" content={result.output} />
             <Action title="New Confirmation" onAction={() => setResult(null)} />
           </ActionPanel>
         }
@@ -37,28 +37,31 @@ export default function ConfirmCommand() {
               const toast = await showToast({ style: Toast.Style.Animated, title: "Confirming..." });
 
               try {
-                const response = await callClaude("confirmation", values.input);
+                const { result: output } = await callFast("confirmation", values.input);
 
-                const record: LearningRecord = {
-                  id: randomUUID(),
-                  type: "confirmation",
-                  input: values.input,
-                  output: response.result,
-                  analysis: response.analysis,
-                  created_at: new Date().toISOString(),
-                  review_count: 0,
-                };
+                await Clipboard.copy(output);
 
-                await Clipboard.copy(response.result);
-
-                const markdown = formatConfirmationResult(values.input, response.result, response.analysis);
-                setResult({ markdown, record });
+                const markdown = `## Confirmation\n\n**Expression:** ${values.input}\n\n---\n\n${output}`;
+                setResult({ markdown, output });
 
                 toast.style = Toast.Style.Success;
                 toast.title = "Confirmed & copied";
 
-                appendRecord(record).catch(console.error);
-                updateCategories(response.analysis.categories).catch(console.error);
+                analyzeInBackground("confirmation", values.input, output)
+                  .then((analysis) => {
+                    const record: LearningRecord = {
+                      id: randomUUID(),
+                      type: "confirmation",
+                      input: values.input,
+                      output,
+                      analysis,
+                      created_at: new Date().toISOString(),
+                      review_count: 0,
+                    };
+                    appendRecord(record).catch(console.error);
+                    updateCategories(analysis.categories).catch(console.error);
+                  })
+                  .catch(console.error);
               } catch (error) {
                 toast.style = Toast.Style.Failure;
                 toast.title = "Confirmation failed";
@@ -72,29 +75,4 @@ export default function ConfirmCommand() {
       <Form.TextArea id="input" title="English to Confirm" placeholder="確認したい英語表現を入力..." />
     </Form>
   );
-}
-
-function formatConfirmationResult(input: string, output: string, analysis: Analysis): string {
-  const categories = analysis.categories.map((c) => `\`${c}\``).join(" ");
-  return `## Confirmation
-
-**Expression:** ${input}
-
----
-
-${output}
-
----
-
-### Nuance you might miss
-${analysis.reason}
-
-### Key Point
-${analysis.key_point}
-
-### Categories
-${categories}
-
-### Difficulty
-${analysis.difficulty}`;
 }

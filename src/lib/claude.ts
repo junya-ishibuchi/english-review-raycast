@@ -1,20 +1,32 @@
 import { AI } from "@raycast/api";
 import { RecordType, Analysis } from "./types";
-import { buildPrompt } from "./prompts";
+import { buildResultPrompt, buildAnalysisPrompt } from "./prompts";
 
-interface ClaudeResponse {
+const FAST_MODEL = AI.Model["Google_Gemini_3.1_Flash_Lite"];
+const SMART_MODEL = AI.Model["Anthropic_Claude_4.6_Sonnet"];
+
+export interface AiResult {
   result: string;
-  analysis: Analysis;
 }
 
-export async function callClaude(type: RecordType, input: string): Promise<ClaudeResponse> {
-  const prompt = buildPrompt(type, input);
+export async function callFast(type: RecordType, input: string): Promise<AiResult> {
+  const prompt = buildResultPrompt(type, input);
 
-  const text = await AI.ask(prompt, {
-    model: AI.Model["Anthropic_Claude_Haiku"],
+  const result = await AI.ask(prompt, {
+    model: FAST_MODEL,
     creativity: "low",
   });
 
-  const parsed = JSON.parse(text) as ClaudeResponse;
-  return parsed;
+  return { result };
+}
+
+export async function analyzeInBackground(type: RecordType, input: string, result: string): Promise<Analysis> {
+  const prompt = buildAnalysisPrompt(type, input, result);
+
+  const text = await AI.ask(prompt, {
+    model: SMART_MODEL,
+    creativity: "low",
+  });
+
+  return JSON.parse(text) as Analysis;
 }

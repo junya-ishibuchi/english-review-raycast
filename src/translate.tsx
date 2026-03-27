@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Detail, Form, showToast, Toast, Clipboard } from "@raycast/api";
 import { useState } from "react";
-import { callClaude } from "./lib/claude";
+import { callFast, analyzeInBackground } from "./lib/claude";
 import { appendRecord, updateCategories } from "./lib/storage";
-import { LearningRecord, Analysis } from "./lib/types";
+import { LearningRecord } from "./lib/types";
 import { randomUUID } from "crypto";
 
 export default function TranslateCommand() {
-  const [result, setResult] = useState<{ markdown: string; record: LearningRecord } | null>(null);
+  const [result, setResult] = useState<{ markdown: string; output: string } | null>(null);
 
   if (result) {
     return (
@@ -14,7 +14,7 @@ export default function TranslateCommand() {
         markdown={result.markdown}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title="Copy Translation" content={result.record.output} />
+            <Action.CopyToClipboard title="Copy Translation" content={result.output} />
             <Action title="New Translation" onAction={() => setResult(null)} />
           </ActionPanel>
         }
@@ -37,29 +37,32 @@ export default function TranslateCommand() {
               const toast = await showToast({ style: Toast.Style.Animated, title: "Translating..." });
 
               try {
-                const response = await callClaude("translation", values.input);
+                const { result: output } = await callFast("translation", values.input);
 
-                const record: LearningRecord = {
-                  id: randomUUID(),
-                  type: "translation",
-                  input: values.input,
-                  output: response.result,
-                  analysis: response.analysis,
-                  created_at: new Date().toISOString(),
-                  review_count: 0,
-                };
+                await Clipboard.copy(output);
 
-                await Clipboard.copy(response.result);
-
-                const markdown = formatTranslationResult(values.input, response.result, response.analysis);
-                setResult({ markdown, record });
+                const markdown = `## Translation\n\n**Input:** ${values.input}\n\n**English:** ${output}`;
+                setResult({ markdown, output });
 
                 toast.style = Toast.Style.Success;
                 toast.title = "Translated & copied";
 
-                // Background: save record + update categories
-                appendRecord(record).catch(console.error);
-                updateCategories(response.analysis.categories).catch(console.error);
+                // Background: analyze with smart model, then save
+                analyzeInBackground("translation", values.input, output)
+                  .then((analysis) => {
+                    const record: LearningRecord = {
+                      id: randomUUID(),
+                      type: "translation",
+                      input: values.input,
+                      output,
+                      analysis,
+                      created_at: new Date().toISOString(),
+                      review_count: 0,
+                    };
+                    appendRecord(record).catch(console.error);
+                    updateCategories(analysis.categories).catch(console.error);
+                  })
+                  .catch(console.error);
               } catch (error) {
                 toast.style = Toast.Style.Failure;
                 toast.title = "Translation failed";
@@ -73,27 +76,4 @@ export default function TranslateCommand() {
       <Form.TextArea id="input" title="Japanese" placeholder="翻訳したい日本語を入力..." />
     </Form>
   );
-}
-
-function formatTranslationResult(input: string, output: string, analysis: Analysis): string {
-  const categories = analysis.categories.map((c) => `\`${c}\``).join(" ");
-  return `## Translation
-
-**Input:** ${input}
-
-**English:** ${output}
-
----
-
-### Why this expression?
-${analysis.reason}
-
-### Key Point
-${analysis.key_point}
-
-### Categories
-${categories}
-
-### Difficulty
-${analysis.difficulty}`;
 }
