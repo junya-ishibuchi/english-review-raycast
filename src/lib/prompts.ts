@@ -57,7 +57,8 @@ export function buildAnalysisPrompt(type: RecordType, input: string, result: str
   (1) 日本語話者がなぜこう書いてしまうのか（母語の干渉、日本語の発想からの直訳、日本語にはない概念など根本原因を分析）
   (2) この文が使われている文脈（ビジネス、カジュアル、技術的など）を踏まえて、なぜ訂正後の表現がより適切かを説明
 - "key_point" = この文法・表現のルールや覚えるべきポイント（日本語で）
-- If a sentence has no issues, set reason to "問題なし" and key_point to ""`,
+- If a sentence has no issues, set reason to "問題なし" and key_point to ""
+- SKIP the following in reason: spelling mistakes (typos) and singular/plural issues. These are minor and not worth explaining. Focus on grammar, expression, and vocabulary issues that matter.`,
 
     translation: `The user (a Japanese speaker) couldn't express something in English and needed a translation from Japanese. Analyze the English result to help them learn.
 - "original" = the user's Japanese input
