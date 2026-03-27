@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Form, showToast, Toast, Clipboard, getSelectedText } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, showToast, Toast, Clipboard, getSelectedText, popToRoot } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { callFast, callFollowUp, analyzeInBackground } from "./lib/claude";
 import { appendRecord, updateCategories } from "./lib/storage";
@@ -143,7 +143,7 @@ export default function TranslateCommand() {
       markdown={state.markdown}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Translation" content={state.output} />
+          <Action title="Paste & Close" onAction={async () => { await Clipboard.paste(state.output); popToRoot(); }} />
           <Action title="Follow Up" onAction={() => setState({ mode: "followup", input: state.input, output: state.output })} />
         </ActionPanel>
       }

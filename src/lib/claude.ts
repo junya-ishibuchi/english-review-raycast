@@ -31,6 +31,13 @@ export async function callFollowUp(type: RecordType, originalInput: string, prev
   return { result };
 }
 
+export async function translateToJapanese(text: string): Promise<string> {
+  return AI.ask(`Translate the following English text to natural Japanese. Respond with ONLY the translation, nothing else.\n\n${text}`, {
+    model: FAST_MODEL,
+    creativity: "low",
+  });
+}
+
 export async function analyzeInBackground(type: RecordType, input: string, result: string): Promise<Analysis> {
   const prompt = buildAnalysisPrompt(type, input, result);
 

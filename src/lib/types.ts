@@ -2,9 +2,15 @@ export type RecordType = "translation" | "correction" | "toJapanese";
 
 export type Difficulty = "basic" | "intermediate" | "advanced";
 
-export interface Analysis {
+export interface SentenceAnalysis {
+  original: string;
+  corrected: string;
   reason: string;
   key_point: string;
+}
+
+export interface Analysis {
+  sentences: SentenceAnalysis[];
   categories: string[];
   difficulty: Difficulty;
 }

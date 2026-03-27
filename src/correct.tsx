@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Detail, Form, showToast, Toast, Clipboard, getSelectedText } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
-import { callFast, callFollowUp, analyzeInBackground } from "./lib/claude";
+import { Action, ActionPanel, Detail, Form, showToast, Toast, Clipboard, getSelectedText, popToRoot } from "@raycast/api";
+import React, { useEffect, useRef, useState } from "react";
+import { callFast, callFollowUp, analyzeInBackground, translateToJapanese } from "./lib/claude";
 import { appendRecord, updateCategories } from "./lib/storage";
 import { LearningRecord } from "./lib/types";
 import { randomUUID } from "crypto";
@@ -10,6 +10,17 @@ type State =
   | { mode: "form" }
   | { mode: "result"; input: string; markdown: string; output: string }
   | { mode: "followup"; input: string; output: string };
+
+function addJapanese(output: string, setState: React.Dispatch<React.SetStateAction<State>>) {
+  translateToJapanese(output)
+    .then((japanese) => {
+      setState((prev) => {
+        if (prev.mode !== "result") return prev;
+        return { ...prev, markdown: `${prev.output}\n\n---\n\n${japanese}` };
+      });
+    })
+    .catch(console.error);
+}
 
 function saveRecord(input: string, output: string) {
   analyzeInBackground("correction", input, output)
@@ -52,6 +63,7 @@ export default function CorrectCommand() {
           toast.style = Toast.Style.Success;
           toast.title = "Corrected & copied";
           saveRecord(input, output);
+          addJapanese(output, setState);
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = "Correction failed";
@@ -88,6 +100,7 @@ export default function CorrectCommand() {
                   toast.style = Toast.Style.Success;
                   toast.title = "Corrected & copied";
                   saveRecord(input, output);
+                  addJapanese(output, setState);
                 } catch (error) {
                   toast.style = Toast.Style.Failure;
                   toast.title = "Correction failed";
@@ -123,6 +136,7 @@ export default function CorrectCommand() {
                   toast.style = Toast.Style.Success;
                   toast.title = "Revised & copied";
                   saveRecord(state.input, newOutput);
+                  addJapanese(newOutput, setState);
                 } catch (error) {
                   toast.style = Toast.Style.Failure;
                   toast.title = "Follow up failed";
@@ -143,7 +157,7 @@ export default function CorrectCommand() {
       markdown={state.markdown}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Corrected Text" content={state.output} />
+          <Action title="Paste & Close" onAction={async () => { await Clipboard.paste(state.output); popToRoot(); }} />
           <Action title="Follow Up" onAction={() => setState({ mode: "followup", input: state.input, output: state.output })} />
         </ActionPanel>
       }

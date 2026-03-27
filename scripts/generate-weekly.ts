@@ -18,9 +18,15 @@ import { homedir } from "os";
 type RecordType = "translation" | "correction" | "toJapanese";
 type Difficulty = "basic" | "intermediate" | "advanced";
 
-interface Analysis {
+interface SentenceAnalysis {
+  original: string;
+  corrected: string;
   reason: string;
   key_point: string;
+}
+
+interface Analysis {
+  sentences: SentenceAnalysis[];
   categories: string[];
   difficulty: Difficulty;
 }

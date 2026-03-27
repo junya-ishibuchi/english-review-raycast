@@ -12,19 +12,19 @@
     <p class="subtitle">{{date}}</p>
 
     <div class="stats">
-      <div class="stat-card">
+      <div class="stat-card active" data-filter="all">
         <div class="number">{{count}}</div>
         <div class="label">Total</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" data-filter="correction">
         <div class="number">{{correctionCount}}</div>
         <div class="label">Corrections</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" data-filter="translation">
         <div class="number">{{translationCount}}</div>
         <div class="label">Translations</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" data-filter="toJapanese">
         <div class="number">{{toJapaneseCount}}</div>
         <div class="label">To Japanese</div>
       </div>
@@ -34,5 +34,27 @@
 
     {{records}}
   </div>
+
+  <script>
+    // Filter
+    document.querySelectorAll('.stat-card[data-filter]').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        const filter = card.dataset.filter;
+        document.querySelectorAll('.record-card').forEach(rec => {
+          rec.style.display = (filter === 'all' || rec.classList.contains(filter)) ? '' : 'none';
+        });
+      });
+    });
+
+    // Collapse/expand
+    document.querySelectorAll('.sentence-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const block = header.parentElement;
+        block.classList.toggle('collapsed');
+      });
+    });
+  </script>
 </body>
 </html>

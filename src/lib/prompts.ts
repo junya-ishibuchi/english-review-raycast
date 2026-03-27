@@ -49,21 +49,48 @@ export function buildAnalysisPrompt(type: RecordType, input: string, result: str
     toJapanese: "translation (English → Japanese)",
   };
 
+  const typeInstructions: Record<RecordType, string> = {
+    correction: `The user wrote English and had it corrected. Analyze what was wrong.
+- "original" = the user's original sentence
+- "corrected" = the corrected version
+- "reason" = なぜ間違っていたか、具体的にどこが不自然だったか（日本語で）
+- "key_point" = この文法・表現のルールや覚えるべきポイント（日本語で）
+- If a sentence has no issues, set reason to "問題なし" and key_point to ""`,
+
+    translation: `The user couldn't express something in English and needed a translation from Japanese. Analyze the English result to help them learn.
+- "original" = the user's Japanese input
+- "corrected" = the English translation
+- "reason" = なぜこの英語表現になるのか、日本語との構造の違い、直訳ではダメな理由など（日本語で）
+- "key_point" = この英語表現を覚えるためのポイント、使えるシチュエーション（日本語で）`,
+
+    toJapanese: `The user couldn't understand the English text and needed a Japanese translation. This means the user had difficulty reading this English. Analyze WHY this English was hard to read.
+- "original" = the English sentence the user couldn't read
+- "corrected" = the Japanese translation
+- "reason" = なぜこの英語が読みにくかったか。構文の複雑さ、知らない単語・イディオム、文法構造など具体的に解説（日本語で）
+- "key_point" = この英文を読めるようになるために覚えるべきこと（単語、文法パターン、構文など）（日本語で）`,
+  };
+
   return `You are an English language learning analyst helping a Japanese speaker. Analyze the following ${typeLabels[type]} interaction and provide a learning analysis.
 
 User input: ${input}
 AI result: ${result}
 
 IMPORTANT RULES:
-- "reason" and "key_point" MUST be written in Japanese (日本語で書いてください)
-- For long texts with multiple sentences, analyze EACH sentence individually. Point out specific errors per sentence, e.g. "1文目: 「a actual」→「an actual」母音の前ではanを使う。2文目: ..."
-- Be specific — quote the exact problematic phrase and its correction
+- Split the input into individual sentences and analyze EACH sentence separately
+${typeInstructions[type]}
+- Be specific — quote the exact phrase that caused difficulty
 
 You MUST respond ONLY with valid JSON in the following format, with no other text before or after:
 
 {
-  "reason": "なぜこの訂正/翻訳が必要だったか — 一文ごとに具体的に解説（日本語で）",
-  "key_point": "最も重要な学習ポイント（日本語で）",
+  "sentences": [
+    {
+      "original": "the user's original sentence",
+      "corrected": "the corrected/translated sentence",
+      "reason": "なぜこの訂正が必要だったか（日本語で）",
+      "key_point": "この文の学習ポイント（日本語で）"
+    }
+  ],
   "categories": ["category1", "category2"],
   "difficulty": "basic|intermediate|advanced"
 }

@@ -18,9 +18,15 @@ import { homedir } from "os";
 type RecordType = "translation" | "correction" | "toJapanese";
 type Difficulty = "basic" | "intermediate" | "advanced";
 
-interface Analysis {
+interface SentenceAnalysis {
+  original: string;
+  corrected: string;
   reason: string;
   key_point: string;
+}
+
+interface Analysis {
+  sentences: SentenceAnalysis[];
   categories: string[];
   difficulty: Difficulty;
 }
@@ -90,6 +96,29 @@ function formatTime(isoString: string): string {
   return date.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
 }
 
+function highlightDiff(original: string, corrected: string): string {
+  if (original === corrected) return escapeHtml(corrected);
+
+  const origWords = original.split(/\s+/);
+  const corrWords = corrected.split(/\s+/);
+  const origSet = new Set(origWords.map((w) => w.toLowerCase()));
+
+  return corrWords
+    .map((word) => {
+      if (!origSet.has(word.toLowerCase())) {
+        return `<span class="diff-highlight">${escapeHtml(word)}</span>`;
+      }
+      return escapeHtml(word);
+    })
+    .join(" ");
+}
+
+function formatReason(reason: string): string {
+  const lines = reason.split(/[。\n]/).map((l) => l.trim()).filter(Boolean);
+  if (lines.length <= 1) return `<p>${escapeHtml(reason)}</p>`;
+  return `<ul>${lines.map((l) => `<li>${escapeHtml(l)}</li>`).join("")}</ul>`;
+}
+
 function renderRecord(record: LearningRecord): string {
   const tags = record.analysis.categories
     .map((cat) => {
@@ -99,19 +128,30 @@ function renderRecord(record: LearningRecord): string {
     .join("");
 
   const difficulty = record.analysis.difficulty || "basic";
+  const isCorrection = record.type === "correction";
+
+  const sentences = record.analysis.sentences || [];
+  const sentencesHtml = sentences.map((s) => {
+    const correctedHtml = isCorrection ? highlightDiff(s.original, s.corrected) : escapeHtml(s.corrected);
+    return `
+    <div class="sentence-block">
+      <div class="sentence-header">
+        <span class="collapse-icon">▶</span>
+        <div class="sentence-original">${escapeHtml(s.original)}</div>
+      </div>
+      <div class="sentence-body">
+        <div class="sentence-corrected">${correctedHtml}</div>
+        <div class="sentence-reason"><strong>Why:</strong> ${formatReason(s.reason)}</div>
+        ${s.key_point ? `<div class="sentence-keypoint"><strong>Key Point:</strong> ${escapeHtml(s.key_point)}</div>` : ""}
+      </div>
+    </div>`;
+  }).join("");
 
   return `
 <div class="record-card ${escapeHtml(record.type)}">
   <span class="record-type">${escapeHtml(record.type)}</span>
   <span class="record-time">${formatTime(record.created_at)}</span>
-  <div class="input">${escapeHtml(record.input)}</div>
-  <div class="output">${escapeHtml(record.output)}</div>
-  <div class="analysis">
-    <h4>Why</h4>
-    <p>${escapeHtml(record.analysis.reason)}</p>
-    <h4>Key Point</h4>
-    <p>${escapeHtml(record.analysis.key_point)}</p>
-  </div>
+  <div class="analysis">${sentencesHtml}</div>
   <div class="tags">${tags}</div>
   <span class="difficulty ${difficulty}">${difficulty}</span>
 </div>`.trim();

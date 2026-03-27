@@ -160,22 +160,119 @@ h1 {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.record-card .analysis h4 {
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+/* Stat card filter */
+.stat-card {
+  cursor: pointer;
+  transition: border-color 0.2s, opacity 0.2s;
+  opacity: 0.6;
+}
+
+.stat-card:hover {
+  opacity: 0.85;
+}
+
+.stat-card.active {
+  opacity: 1;
+  border-color: var(--success);
+}
+
+/* Sentence blocks - collapsible */
+.sentence-block {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.sentence-block:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.sentence-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sentence-header:hover .sentence-original {
+  color: var(--text);
+}
+
+.collapse-icon {
+  font-size: 0.65rem;
   color: var(--text-muted);
-  margin-bottom: 6px;
-  margin-top: 10px;
+  margin-top: 4px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
 }
 
-.record-card .analysis h4:first-child {
-  margin-top: 0;
+.sentence-block:not(.collapsed) .collapse-icon {
+  transform: rotate(90deg);
 }
 
-.record-card .analysis p {
-  font-size: 0.88rem;
+.sentence-body {
+  margin-top: 8px;
+  margin-left: 18px;
+}
+
+.sentence-block.collapsed .sentence-body {
+  display: none;
+}
+
+.sentence-original {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  transition: color 0.15s;
+}
+
+.sentence-corrected {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  padding: 8px 12px;
+  background: rgba(78, 204, 163, 0.06);
+  border-radius: 6px;
+  border-left: 2px solid var(--success);
+  margin-bottom: 8px;
+}
+
+/* Diff highlight */
+.diff-highlight {
+  background: rgba(78, 204, 163, 0.25);
+  color: var(--success);
+  padding: 1px 3px;
+  border-radius: 3px;
+}
+
+.sentence-reason {
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.55;
+  margin-bottom: 4px;
+}
+
+.sentence-reason strong,
+.sentence-keypoint strong {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sentence-reason ul {
+  margin: 4px 0 0 16px;
+  padding: 0;
+}
+
+.sentence-reason li {
+  margin-bottom: 3px;
+}
+
+.sentence-keypoint {
+  font-size: 0.85rem;
   color: var(--text);
   line-height: 1.55;
 }
