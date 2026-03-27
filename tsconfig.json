@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@raycast/eslint-config/tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "resolveJsonModule": true,
+    "strict": true,
+    "outDir": "dist"
+  },
+  "include": ["src/**/*"]
+}

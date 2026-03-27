@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "english-review",
+  "title": "English Review",
+  "description": "Record and review English learning interactions with AI analysis",
+  "icon": "icon.png",
+  "author": "ji",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate",
+      "description": "Translate Japanese to English",
+      "mode": "view"
+    },
+    {
+      "name": "correct",
+      "title": "Correct",
+      "description": "Correct my English writing",
+      "mode": "view"
+    },
+    {
+      "name": "explain",
+      "title": "Explain",
+      "description": "Explain an English expression",
+      "mode": "view"
+    },
+    {
+      "name": "confirm",
+      "title": "Confirm",
+      "description": "Confirm my understanding of English",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "anthropicApiKey",
+      "type": "password",
+      "title": "Anthropic API Key",
+      "description": "Your Anthropic API key for Claude",
+      "required": true,
+      "placeholder": "sk-ant-..."
+    },
+    {
+      "name": "claudeModel",
+      "type": "dropdown",
+      "title": "Claude Model",
+      "description": "Which Claude model to use",
+      "required": true,
+      "data": [
+        { "title": "Claude Sonnet 4.6", "value": "claude-sonnet-4-6-20250514" },
+        { "title": "Claude Haiku 4.5", "value": "claude-haiku-4-5-20251001" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^1.19.1",
+    "@anthropic-ai/sdk": "^0.39.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
