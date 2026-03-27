@@ -36,6 +36,27 @@
   </div>
 
   <script>
+    // Read state
+    const STORAGE_KEY = 'english-review-read';
+    function getReadIds() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+    }
+    function saveReadIds(ids) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+    }
+    function markAsRead(id) {
+      const ids = getReadIds();
+      if (!ids.includes(id)) { ids.push(id); saveReadIds(ids); }
+    }
+
+    // Apply read state on load
+    const readIds = getReadIds();
+    document.querySelectorAll('.record-card').forEach(card => {
+      if (readIds.includes(card.dataset.id)) {
+        card.classList.add('read', 'collapsed');
+      }
+    });
+
     // Filter
     document.querySelectorAll('.stat-card[data-filter]').forEach(card => {
       card.addEventListener('click', () => {
@@ -48,11 +69,26 @@
       });
     });
 
-    // Collapse/expand
-    document.querySelectorAll('.sentence-header').forEach(header => {
+    // Card-level collapse/expand (click header)
+    document.querySelectorAll('.record-header').forEach(header => {
       header.addEventListener('click', () => {
-        const block = header.parentElement;
-        block.classList.toggle('collapsed');
+        const card = header.closest('.record-card');
+        const wasExpanded = !card.classList.contains('collapsed');
+        card.classList.toggle('collapsed');
+
+        // Collapsing → mark as read
+        if (wasExpanded) {
+          markAsRead(card.dataset.id);
+          card.classList.add('read');
+        }
+      });
+    });
+
+    // Sentence-level collapse/expand
+    document.querySelectorAll('.sentence-header').forEach(header => {
+      header.addEventListener('click', (e) => {
+        e.stopPropagation();
+        header.parentElement.classList.toggle('collapsed');
       });
     });
   </script>

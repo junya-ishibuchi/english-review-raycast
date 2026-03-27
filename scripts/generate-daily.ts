@@ -148,13 +148,21 @@ function renderRecord(record: LearningRecord): string {
     </div>`;
   }).join("");
 
+  const firstOriginal = sentences.length > 0 ? sentences[0].original : record.input;
+  const preview = firstOriginal.length > 80 ? firstOriginal.slice(0, 80) + "..." : firstOriginal;
+
   return `
-<div class="record-card ${escapeHtml(record.type)}">
-  <span class="record-type">${escapeHtml(record.type)}</span>
-  <span class="record-time">${formatTime(record.created_at)}</span>
-  <div class="analysis">${sentencesHtml}</div>
-  <div class="tags">${tags}</div>
-  <span class="difficulty ${difficulty}">${difficulty}</span>
+<div class="record-card ${escapeHtml(record.type)}" data-id="${escapeHtml(record.id)}">
+  <div class="record-header">
+    <span class="record-type">${escapeHtml(record.type)}</span>
+    <span class="record-time">${formatTime(record.created_at)}</span>
+    <span class="record-preview">${escapeHtml(preview)}</span>
+  </div>
+  <div class="record-body">
+    <div class="analysis">${sentencesHtml}</div>
+    <div class="tags">${tags}</div>
+    <span class="difficulty ${difficulty}">${difficulty}</span>
+  </div>
 </div>`.trim();
 }
 

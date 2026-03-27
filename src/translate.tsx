@@ -12,21 +12,19 @@ type State =
   | { mode: "followup"; input: string; output: string };
 
 function saveRecord(input: string, output: string) {
+  const id = randomUUID();
+  const created_at = new Date().toISOString();
+
   analyzeInBackground("translation", input, output)
     .then((analysis) => {
-      const record: LearningRecord = {
-        id: randomUUID(),
-        type: "translation",
-        input,
-        output,
-        analysis,
-        created_at: new Date().toISOString(),
-        review_count: 0,
-      };
+      const record: LearningRecord = { id, type: "translation", input, output, analysis, created_at, review_count: 0 };
       appendRecord(record).catch(console.error);
       updateCategories(analysis.categories).catch(console.error);
     })
-    .catch(console.error);
+    .catch(() => {
+      const fallback: LearningRecord = { id, type: "translation", input, output, analysis: { sentences: [], categories: [], difficulty: "basic" }, created_at, review_count: 0 };
+      appendRecord(fallback).catch(console.error);
+    });
 }
 
 export default function TranslateCommand() {
