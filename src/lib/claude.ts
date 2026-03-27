@@ -28,5 +28,11 @@ export async function analyzeInBackground(type: RecordType, input: string, resul
     creativity: "low",
   });
 
-  return JSON.parse(text) as Analysis;
+  return parseJson<Analysis>(text);
+}
+
+function parseJson<T>(text: string): T {
+  // Strip markdown code fences if present (e.g. ```json ... ```)
+  const cleaned = text.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
+  return JSON.parse(cleaned) as T;
 }
