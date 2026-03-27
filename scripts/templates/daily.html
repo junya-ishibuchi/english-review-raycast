@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Review – {{date}}</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>English Review</h1>
+    <p class="subtitle">{{date}}</p>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="number">{{count}}</div>
+        <div class="label">Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">{{correctionCount}}</div>
+        <div class="label">Corrections</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">{{translationCount}}</div>
+        <div class="label">Translations</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">{{explanationCount}}</div>
+        <div class="label">Explanations</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">{{confirmationCount}}</div>
+        <div class="label">Confirmations</div>
+      </div>
+    </div>
+
+    <div class="section-title">Records</div>
+
+    {{records}}
+  </div>
+</body>
+</html>
