@@ -35,16 +35,21 @@ export function buildAnalysisPrompt(type: RecordType, input: string, result: str
     confirmation: "English comprehension confirmation",
   };
 
-  return `You are an English language learning analyst. Analyze the following ${typeLabels[type]} interaction and provide a learning analysis.
+  return `You are an English language learning analyst helping a Japanese speaker. Analyze the following ${typeLabels[type]} interaction and provide a learning analysis.
 
 User input: ${input}
 AI result: ${result}
 
+IMPORTANT RULES:
+- "reason" and "key_point" MUST be written in Japanese (日本語で書いてください)
+- For long texts with multiple sentences, analyze EACH sentence individually. Point out specific errors per sentence, e.g. "1文目: 「a actual」→「an actual」母音の前ではanを使う。2文目: ..."
+- Be specific — quote the exact problematic phrase and its correction
+
 You MUST respond ONLY with valid JSON in the following format, with no other text before or after:
 
 {
-  "reason": "Why this correction/translation was needed - focus on the root cause of the learner's difficulty",
-  "key_point": "The single most important learning takeaway",
+  "reason": "なぜこの訂正/翻訳が必要だったか — 一文ごとに具体的に解説（日本語で）",
+  "key_point": "最も重要な学習ポイント（日本語で）",
   "categories": ["category1", "category2"],
   "difficulty": "basic|intermediate|advanced"
 }
