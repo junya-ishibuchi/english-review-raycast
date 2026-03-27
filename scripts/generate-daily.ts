@@ -141,8 +141,9 @@ function renderRecord(record: LearningRecord): string {
       </div>
       <div class="sentence-body">
         <div class="sentence-corrected">${correctedHtml}</div>
-        <div class="sentence-reason"><strong>Why:</strong> ${formatReason(s.reason)}</div>
-        ${s.key_point ? `<div class="sentence-keypoint"><strong>Key Point:</strong> ${escapeHtml(s.key_point)}</div>` : ""}
+        <span class="analysis-label">Why</span>
+        <div class="sentence-reason">${formatReason(s.reason)}</div>
+        ${s.key_point ? `<span class="analysis-label">Key Point</span>\n        <div class="sentence-keypoint">${escapeHtml(s.key_point)}</div>` : ""}
       </div>
     </div>`;
   }).join("");
