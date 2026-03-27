@@ -1,6 +1,6 @@
 import { AI } from "@raycast/api";
 import { RecordType, Analysis } from "./types";
-import { buildResultPrompt, buildAnalysisPrompt } from "./prompts";
+import { buildResultPrompt, buildFollowUpPrompt, buildAnalysisPrompt } from "./prompts";
 
 const FAST_MODEL = AI.Model["Google_Gemini_3.1_Flash_Lite"];
 const SMART_MODEL = AI.Model["Anthropic_Claude_4.6_Sonnet"];
@@ -11,6 +11,17 @@ export interface AiResult {
 
 export async function callFast(type: RecordType, input: string): Promise<AiResult> {
   const prompt = buildResultPrompt(type, input);
+
+  const result = await AI.ask(prompt, {
+    model: FAST_MODEL,
+    creativity: "low",
+  });
+
+  return { result };
+}
+
+export async function callFollowUp(type: RecordType, originalInput: string, previousResult: string, followUp: string): Promise<AiResult> {
+  const prompt = buildFollowUpPrompt(type, originalInput, previousResult, followUp);
 
   const result = await AI.ask(prompt, {
     model: FAST_MODEL,

@@ -1,41 +1,32 @@
 import { Action, ActionPanel, Detail, Form, showToast, Toast, Clipboard, getSelectedText } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { callFast, analyzeInBackground } from "./lib/claude";
+import { callFast, callFollowUp, analyzeInBackground } from "./lib/claude";
 import { appendRecord, updateCategories } from "./lib/storage";
 import { LearningRecord } from "./lib/types";
 import { randomUUID } from "crypto";
 
-type State = { mode: "loading" } | { mode: "form" } | { mode: "result"; markdown: string; output: string };
+type State =
+  | { mode: "loading" }
+  | { mode: "form" }
+  | { mode: "result"; input: string; markdown: string; output: string }
+  | { mode: "followup"; input: string; output: string };
 
-async function run(input: string, setState: (s: State) => void) {
-  const toast = await showToast({ style: Toast.Style.Animated, title: "Translating..." });
-  try {
-    const { result: output } = await callFast("toJapanese", input);
-    await Clipboard.copy(output);
-    setState({ mode: "result", markdown: output, output });
-    toast.style = Toast.Style.Success;
-    toast.title = "Translated & copied";
-
-    analyzeInBackground("toJapanese", input, output)
-      .then((analysis) => {
-        const record: LearningRecord = {
-          id: randomUUID(),
-          type: "toJapanese",
-          input,
-          output,
-          analysis,
-          created_at: new Date().toISOString(),
-          review_count: 0,
-        };
-        appendRecord(record).catch(console.error);
-        updateCategories(analysis.categories).catch(console.error);
-      })
-      .catch(console.error);
-  } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Translation failed";
-    toast.message = String(error);
-  }
+function saveRecord(input: string, output: string) {
+  analyzeInBackground("toJapanese", input, output)
+    .then((analysis) => {
+      const record: LearningRecord = {
+        id: randomUUID(),
+        type: "toJapanese",
+        input,
+        output,
+        analysis,
+        created_at: new Date().toISOString(),
+        review_count: 0,
+      };
+      appendRecord(record).catch(console.error);
+      updateCategories(analysis.categories).catch(console.error);
+    })
+    .catch(console.error);
 }
 
 export default function ToJapaneseCommand() {
@@ -53,7 +44,19 @@ export default function ToJapaneseCommand() {
         // no selection
       }
       if (input) {
-        await run(input, setState);
+        const toast = await showToast({ style: Toast.Style.Animated, title: "Translating..." });
+        try {
+          const { result: output } = await callFast("toJapanese", input);
+          await Clipboard.copy(output);
+          setState({ mode: "result", input, markdown: output, output });
+          toast.style = Toast.Style.Success;
+          toast.title = "Translated & copied";
+          saveRecord(input, output);
+        } catch (error) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Translation failed";
+          toast.message = String(error);
+        }
       } else {
         setState({ mode: "form" });
       }
@@ -76,7 +79,20 @@ export default function ToJapaneseCommand() {
                   await showToast({ style: Toast.Style.Failure, title: "Input is empty" });
                   return;
                 }
-                await run(values.input.trim(), setState);
+                const input = values.input.trim();
+                const toast = await showToast({ style: Toast.Style.Animated, title: "Translating..." });
+                try {
+                  const { result: output } = await callFast("toJapanese", input);
+                  await Clipboard.copy(output);
+                  setState({ mode: "result", input, markdown: output, output });
+                  toast.style = Toast.Style.Success;
+                  toast.title = "Translated & copied";
+                  saveRecord(input, output);
+                } catch (error) {
+                  toast.style = Toast.Style.Failure;
+                  toast.title = "Translation failed";
+                  toast.message = String(error);
+                }
               }}
             />
           </ActionPanel>
@@ -87,12 +103,48 @@ export default function ToJapaneseCommand() {
     );
   }
 
+  if (state.mode === "followup") {
+    return (
+      <Form
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm
+              title="Send Follow Up"
+              onSubmit={async (values: { followup: string }) => {
+                if (!values.followup.trim()) {
+                  await showToast({ style: Toast.Style.Failure, title: "Input is empty" });
+                  return;
+                }
+                const toast = await showToast({ style: Toast.Style.Animated, title: "Revising..." });
+                try {
+                  const { result: newOutput } = await callFollowUp("toJapanese", state.input, state.output, values.followup.trim());
+                  await Clipboard.copy(newOutput);
+                  setState({ mode: "result", input: state.input, markdown: newOutput, output: newOutput });
+                  toast.style = Toast.Style.Success;
+                  toast.title = "Revised & copied";
+                  saveRecord(state.input, newOutput);
+                } catch (error) {
+                  toast.style = Toast.Style.Failure;
+                  toast.title = "Follow up failed";
+                  toast.message = String(error);
+                }
+              }}
+            />
+          </ActionPanel>
+        }
+      >
+        <Form.TextArea id="followup" title="Follow Up" placeholder="ニュアンスの追加や修正の指示..." />
+      </Form>
+    );
+  }
+
   return (
     <Detail
       markdown={state.markdown}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Translation" content={state.output} />
+          <Action title="Follow Up" onAction={() => setState({ mode: "followup", input: state.input, output: state.output })} />
         </ActionPanel>
       }
     />

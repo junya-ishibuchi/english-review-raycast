@@ -24,6 +24,24 @@ ${prefixes[type]}
 ${input}`;
 }
 
+export function buildFollowUpPrompt(type: RecordType, originalInput: string, previousResult: string, followUp: string): string {
+  const typeContext: Record<RecordType, string> = {
+    translation: "You translated the user's Japanese text to English.",
+    correction: "You corrected the user's English text.",
+    toJapanese: "You translated the user's English text to Japanese.",
+  };
+
+  return `${typeContext[type]}
+
+Original input: ${originalInput}
+Your previous result: ${previousResult}
+
+The user has a follow-up request. Revise your result based on their feedback.
+Respond with ONLY the revised result text, no JSON, no extra formatting. Do not include any explanation.
+
+User's follow-up: ${followUp}`;
+}
+
 export function buildAnalysisPrompt(type: RecordType, input: string, result: string): string {
   const typeLabels: Record<RecordType, string> = {
     translation: "translation (Japanese → English)",
