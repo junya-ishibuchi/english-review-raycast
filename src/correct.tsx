@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, Form, showToast, Toast, Clipboard } from "
 import { useState } from "react";
 import { callClaude } from "./lib/claude";
 import { appendRecord, updateCategories } from "./lib/storage";
-import { LearningRecord } from "./lib/types";
+import { LearningRecord, Analysis } from "./lib/types";
 import { randomUUID } from "crypto";
 
 export default function CorrectCommand() {
@@ -74,7 +74,7 @@ export default function CorrectCommand() {
   );
 }
 
-function formatCorrectionResult(input: string, output: string, analysis: { reason: string; key_point: string; categories: string[]; difficulty: string }): string {
+function formatCorrectionResult(input: string, output: string, analysis: Analysis): string {
   const categories = analysis.categories.map((c) => `\`${c}\``).join(" ");
   return `## Correction
 
