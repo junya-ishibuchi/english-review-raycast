@@ -73,7 +73,8 @@ export function buildAnalysisPrompt(type: RecordType, input: string, result: str
 - "reason" = 2つの観点で書くこと（日本語で）:
   (1) なぜ日本語話者にとってこの英語が読みにくいのか（日本語にない構文パターン、多義語、省略、文化的背景など根本原因）
   (2) この文が使われている文脈（ビジネスメール、技術文書、カジュアルなチャットなど）を踏まえた読解のコツ
-- "key_point" = この英文を読めるようになるために覚えるべきこと（単語、文法パターン、構文など）（日本語で）`,
+- "key_point" = この英文を読めるようになるために覚えるべきこと（単語、文法パターン、構文など）（日本語で）
+- "idioms" = この文に含まれるイディオム、句動詞、慣用表現。各イディオムは {"phrase": "英語表現", "meaning": "日本語での意味の説明", "example": "例文（英語）"} の形式。なければ空配列[]`,
   };
 
   return `You are an English language learning analyst helping a Japanese speaker. Analyze the following ${typeLabels[type]} interaction and provide a learning analysis.
@@ -94,7 +95,8 @@ You MUST respond ONLY with valid JSON in the following format, with no other tex
       "original": "the user's original sentence",
       "corrected": "the corrected/translated sentence",
       "reason": "なぜこの訂正が必要だったか（日本語で）",
-      "key_point": "この文の学習ポイント（日本語で）"
+      "key_point": "この文の学習ポイント（日本語で）",
+      "idioms": [{"phrase": "break the ice", "meaning": "緊張をほぐす", "example": "He told a joke to break the ice."}]
     }
   ],
   "categories": ["category1", "category2"],

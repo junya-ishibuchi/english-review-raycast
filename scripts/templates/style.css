@@ -119,6 +119,17 @@ h1 {
   margin-bottom: 24px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-left: 4px solid var(--text-muted);
+  position: relative;
+}
+
+.record-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  cursor: pointer;
 }
 
 /* Card-level collapse */
@@ -233,7 +244,6 @@ h1 {
   align-items: flex-start;
   gap: 10px;
   cursor: pointer;
-  user-select: none;
   padding: 6px 0;
 }
 
@@ -242,6 +252,7 @@ h1 {
 }
 
 .collapse-icon {
+  user-select: none;
   font-size: 0.6rem;
   color: var(--text-muted);
   margin-top: 6px;
@@ -288,6 +299,13 @@ h1 {
   padding: 1px 4px;
   border-radius: 3px;
   font-weight: 700;
+}
+
+.diff-minor {
+  background: rgba(78, 204, 163, 0.08);
+  color: rgba(78, 204, 163, 0.5);
+  padding: 1px 4px;
+  border-radius: 3px;
 }
 
 /* Why / Key Point labels */
@@ -350,6 +368,56 @@ h1 {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+}
+
+/* Idioms */
+.idiom-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.idiom-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  background: rgba(243, 156, 18, 0.04);
+  border-radius: 8px;
+  border-left: 3px solid var(--warning);
+}
+
+.idiom-chip {
+  display: inline-block;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--warning);
+  cursor: pointer;
+  transition: color 0.15s;
+  align-self: flex-start;
+}
+
+.idiom-chip:hover {
+  color: #f7c948;
+  text-decoration: underline;
+}
+
+.idiom-chip.copied {
+  color: var(--success);
+}
+
+.idiom-meaning {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.idiom-example {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.6;
 }
 
 /* Tags */

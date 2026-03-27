@@ -25,6 +25,12 @@
       "title": "Nihongo",
       "description": "Translate English to Japanese",
       "mode": "view"
+    },
+    {
+      "name": "reanalyze",
+      "title": "Reanalyze",
+      "description": "Re-run analysis on records with missing analysis",
+      "mode": "view"
     }
   ],
   "dependencies": {

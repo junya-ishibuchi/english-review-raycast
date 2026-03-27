@@ -7,6 +7,7 @@ export interface SentenceAnalysis {
   corrected: string;
   reason: string;
   key_point: string;
+  idioms?: { phrase: string; meaning: string; example: string }[];
 }
 
 export interface Analysis {

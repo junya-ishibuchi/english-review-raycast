@@ -23,6 +23,7 @@ interface SentenceAnalysis {
   corrected: string;
   reason: string;
   key_point: string;
+  idioms?: { phrase: string; meaning: string; example: string }[];
 }
 
 interface Analysis {
@@ -96,19 +97,56 @@ function formatTime(isoString: string): string {
   return date.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
 }
 
+function stripPunctuation(w: string): string {
+  return w.replace(/[.,;:!?'"()[\]{}]/g, "");
+}
+
+function isSpellingFix(origWord: string, corrWord: string): boolean {
+  const a = stripPunctuation(origWord).toLowerCase();
+  const b = stripPunctuation(corrWord).toLowerCase();
+  if (a === b) return false;
+  if (a.length === 0 || b.length === 0) return false;
+  // Levenshtein distance <= 2 = likely typo/spelling
+  const len = Math.max(a.length, b.length);
+  let dist = 0;
+  const matrix: number[][] = [];
+  for (let i = 0; i <= a.length; i++) { matrix[i] = [i]; }
+  for (let j = 0; j <= b.length; j++) { matrix[0][j] = j; }
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
+    }
+  }
+  dist = matrix[a.length][b.length];
+  return dist <= 2 && dist < len * 0.5;
+}
+
+function isPunctuationOnly(origWord: string, corrWord: string): boolean {
+  return stripPunctuation(origWord).toLowerCase() === stripPunctuation(corrWord).toLowerCase() && origWord !== corrWord;
+}
+
 function highlightDiff(original: string, corrected: string): string {
   if (original === corrected) return escapeHtml(corrected);
 
   const origWords = original.split(/\s+/);
   const corrWords = corrected.split(/\s+/);
-  const origSet = new Set(origWords.map((w) => w.toLowerCase()));
+  const origLower = origWords.map((w) => w.toLowerCase());
 
   return corrWords
     .map((word) => {
-      if (!origSet.has(word.toLowerCase())) {
-        return `<span class="diff-highlight">${escapeHtml(word)}</span>`;
+      if (origLower.includes(word.toLowerCase())) {
+        return escapeHtml(word);
       }
-      return escapeHtml(word);
+      // Find closest original word for classification
+      const match = origWords.find((ow) => isSpellingFix(ow, word) || isPunctuationOnly(ow, word));
+      if (match && isPunctuationOnly(match, word)) {
+        return `<span class="diff-minor">${escapeHtml(word)}</span>`;
+      }
+      if (match && isSpellingFix(match, word)) {
+        return `<span class="diff-minor">${escapeHtml(word)}</span>`;
+      }
+      return `<span class="diff-highlight">${escapeHtml(word)}</span>`;
     })
     .join(" ");
 }
@@ -131,6 +169,32 @@ function renderRecord(record: LearningRecord): string {
   const isCorrection = record.type === "correction";
 
   const sentences = record.analysis.sentences || [];
+
+  // Fallback when analysis is empty: show input/output directly
+  if (sentences.length === 0 && record.output) {
+    const firstLine = record.input.length > 80 ? record.input.slice(0, 80) + "..." : record.input;
+    const preview = firstLine;
+
+    return `
+<div class="record-card ${escapeHtml(record.type)}" data-id="${escapeHtml(record.id)}">
+  <div class="record-header">
+    <span class="record-type">${escapeHtml(record.type)}</span>
+    <span class="record-time">${formatTime(record.created_at)}</span>
+    <span class="record-preview">${escapeHtml(preview)}</span>
+  </div>
+  <div class="record-body">
+    <div class="analysis">
+      <div class="sentence-block">
+        <div class="sentence-original">${escapeHtml(record.input)}</div>
+        <div class="sentence-corrected">${escapeHtml(record.output)}</div>
+      </div>
+    </div>
+    <div class="tags">${tags}</div>
+    <span class="difficulty ${difficulty}">${difficulty}</span>
+  </div>
+</div>`.trim();
+  }
+
   const sentencesHtml = sentences.map((s) => {
     const correctedHtml = isCorrection ? highlightDiff(s.original, s.corrected) : escapeHtml(s.corrected);
     return `
@@ -144,6 +208,7 @@ function renderRecord(record: LearningRecord): string {
         <span class="analysis-label">Why</span>
         <div class="sentence-reason">${formatReason(s.reason)}</div>
         ${s.key_point ? `<span class="analysis-label">Key Point</span>\n        <div class="sentence-keypoint">${escapeHtml(s.key_point)}</div>` : ""}
+        ${(s.idioms && s.idioms.length > 0) ? `<span class="analysis-label">Idioms</span>\n        <div class="idiom-list">${s.idioms.map((idiom) => { const phrase = typeof idiom === "string" ? idiom : idiom.phrase; const meaning = typeof idiom === "string" ? "" : (idiom.meaning || ""); const example = typeof idiom === "string" ? "" : (idiom.example || ""); return `<div class="idiom-item"><span class="idiom-chip" data-idiom="${escapeHtml(phrase)}" data-original="${escapeHtml(s.original)}">${escapeHtml(phrase)}</span>${meaning ? `<span class="idiom-meaning">${escapeHtml(meaning)}</span>` : ""}${example ? `<span class="idiom-example">${escapeHtml(example)}</span>` : ""}</div>`; }).join("")}</div>` : ""}
       </div>
     </div>`;
   }).join("");
@@ -236,7 +301,7 @@ async function main(): Promise<void> {
   <p>No records found for this day.</p>
 </div>`.trim();
   } else {
-    recordsHtml = records.map(renderRecord).join("\n");
+    recordsHtml = [...records].reverse().map(renderRecord).join("\n");
   }
 
   // Format display date

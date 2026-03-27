@@ -19,6 +19,8 @@ declare namespace Preferences {
   export type Correct = ExtensionPreferences & {}
   /** Preferences accessible in the `to-japanese` command */
   export type ToJapanese = ExtensionPreferences & {}
+  /** Preferences accessible in the `reanalyze` command */
+  export type Reanalyze = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -28,5 +30,7 @@ declare namespace Arguments {
   export type Correct = {}
   /** Arguments passed to the `to-japanese` command */
   export type ToJapanese = {}
+  /** Arguments passed to the `reanalyze` command */
+  export type Reanalyze = {}
 }
 

@@ -23,6 +23,7 @@ interface SentenceAnalysis {
   corrected: string;
   reason: string;
   key_point: string;
+  idioms?: { phrase: string; meaning: string; example: string }[];
 }
 
 interface Analysis {
@@ -116,18 +117,18 @@ function renderRecord(record: LearningRecord): string {
 
   const difficulty = record.analysis.difficulty || "basic";
 
+  const sentences = record.analysis.sentences || [];
+  const sentencesHtml = sentences.map((s) => `
+    <div class="sentence-summary">
+      <div class="sentence-original">${escapeHtml(s.original)}</div>
+      <div class="sentence-corrected">${escapeHtml(s.corrected)}</div>
+    </div>`).join("");
+
   return `
 <div class="record-card ${escapeHtml(record.type)}">
   <span class="record-type">${escapeHtml(record.type)}</span>
   <span class="record-time">${formatDate(record.created_at)} ${formatTime(record.created_at)}</span>
-  <div class="input">${escapeHtml(record.input)}</div>
-  <div class="output">${escapeHtml(record.output)}</div>
-  <div class="analysis">
-    <h4>Why</h4>
-    <p>${escapeHtml(record.analysis.reason)}</p>
-    <h4>Key Point</h4>
-    <p>${escapeHtml(record.analysis.key_point)}</p>
-  </div>
+  <div class="analysis">${sentencesHtml}</div>
   <div class="tags">${tags}</div>
   <span class="difficulty ${difficulty}">${difficulty}</span>
 </div>`.trim();

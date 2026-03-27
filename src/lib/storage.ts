@@ -52,6 +52,17 @@ export async function appendRecord(record: LearningRecord): Promise<void> {
   await writeFile(monthlyFilePath(date), JSON.stringify(data, null, 2), "utf-8");
 }
 
+export async function updateRecord(id: string, updates: Partial<LearningRecord>): Promise<void> {
+  await ensureDirectories();
+  const date = new Date();
+  const data = await readMonthlyData(date);
+  const idx = data.records.findIndex((r) => r.id === id);
+  if (idx >= 0) {
+    data.records[idx] = { ...data.records[idx], ...updates };
+    await writeFile(monthlyFilePath(date), JSON.stringify(data, null, 2), "utf-8");
+  }
+}
+
 export async function readCategories(): Promise<CategoriesData> {
   const filePath = categoriesFilePath();
   if (!existsSync(filePath)) {

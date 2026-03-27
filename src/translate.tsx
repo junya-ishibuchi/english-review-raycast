@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Form, showToast, Toast, Clipboard, getSelectedText, popToRoot } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { callFast, callFollowUp, analyzeInBackground } from "./lib/claude";
-import { appendRecord, updateCategories } from "./lib/storage";
+import { appendRecord, updateRecord, updateCategories } from "./lib/storage";
 import { LearningRecord } from "./lib/types";
 import { randomUUID } from "crypto";
 
@@ -11,25 +11,21 @@ type State =
   | { mode: "result"; input: string; markdown: string; output: string }
   | { mode: "followup"; input: string; output: string };
 
-function saveRecord(input: string, output: string) {
-  const id = randomUUID();
-  const created_at = new Date().toISOString();
+const emptyAnalysis = { sentences: [], categories: [], difficulty: "basic" as const };
 
+function runAnalysis(recordId: string, input: string, output: string) {
   analyzeInBackground("translation", input, output)
     .then((analysis) => {
-      const record: LearningRecord = { id, type: "translation", input, output, analysis, created_at, review_count: 0 };
-      appendRecord(record).catch(console.error);
+      updateRecord(recordId, { analysis }).catch(console.error);
       updateCategories(analysis.categories).catch(console.error);
     })
-    .catch(() => {
-      const fallback: LearningRecord = { id, type: "translation", input, output, analysis: { sentences: [], categories: [], difficulty: "basic" }, created_at, review_count: 0 };
-      appendRecord(fallback).catch(console.error);
-    });
+    .catch(console.error);
 }
 
 export default function TranslateCommand() {
   const [state, setState] = useState<State>({ mode: "loading" });
   const launched = useRef(false);
+  const recordId = useRef(randomUUID());
 
   useEffect(() => {
     if (launched.current) return;
@@ -42,6 +38,9 @@ export default function TranslateCommand() {
         // no selection
       }
       if (input) {
+        const record: LearningRecord = { id: recordId.current, type: "translation", input, output: "", analysis: emptyAnalysis, created_at: new Date().toISOString(), review_count: 0 };
+        appendRecord(record).catch(console.error);
+
         const toast = await showToast({ style: Toast.Style.Animated, title: "Translating..." });
         try {
           const { result: output } = await callFast("translation", input);
@@ -49,7 +48,8 @@ export default function TranslateCommand() {
           setState({ mode: "result", input, markdown: output, output });
           toast.style = Toast.Style.Success;
           toast.title = "Translated & copied";
-          saveRecord(input, output);
+          updateRecord(recordId.current, { output }).catch(console.error);
+          runAnalysis(recordId.current, input, output);
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = "Translation failed";
@@ -78,6 +78,10 @@ export default function TranslateCommand() {
                   return;
                 }
                 const input = values.input.trim();
+                recordId.current = randomUUID();
+                const record: LearningRecord = { id: recordId.current, type: "translation", input, output: "", analysis: emptyAnalysis, created_at: new Date().toISOString(), review_count: 0 };
+                appendRecord(record).catch(console.error);
+
                 const toast = await showToast({ style: Toast.Style.Animated, title: "Translating..." });
                 try {
                   const { result: output } = await callFast("translation", input);
@@ -85,7 +89,8 @@ export default function TranslateCommand() {
                   setState({ mode: "result", input, markdown: output, output });
                   toast.style = Toast.Style.Success;
                   toast.title = "Translated & copied";
-                  saveRecord(input, output);
+                  updateRecord(recordId.current, { output }).catch(console.error);
+                  runAnalysis(recordId.current, input, output);
                 } catch (error) {
                   toast.style = Toast.Style.Failure;
                   toast.title = "Translation failed";
@@ -120,7 +125,8 @@ export default function TranslateCommand() {
                   setState({ mode: "result", input: state.input, markdown: newOutput, output: newOutput });
                   toast.style = Toast.Style.Success;
                   toast.title = "Revised & copied";
-                  saveRecord(state.input, newOutput);
+                  updateRecord(recordId.current, { output: newOutput }).catch(console.error);
+                  runAnalysis(recordId.current, state.input, newOutput);
                 } catch (error) {
                   toast.style = Toast.Style.Failure;
                   toast.title = "Follow up failed";

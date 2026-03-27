@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Form, showToast, Toast, Clipboard, getSelectedText, popToRoot } from "@raycast/api";
 import React, { useEffect, useRef, useState } from "react";
 import { callFast, callFollowUp, analyzeInBackground, translateToJapanese } from "./lib/claude";
-import { appendRecord, updateCategories } from "./lib/storage";
+import { appendRecord, updateRecord, updateCategories } from "./lib/storage";
 import { LearningRecord } from "./lib/types";
 import { randomUUID } from "crypto";
 
@@ -10,6 +10,8 @@ type State =
   | { mode: "form" }
   | { mode: "result"; input: string; markdown: string; output: string }
   | { mode: "followup"; input: string; output: string };
+
+const emptyAnalysis = { sentences: [], categories: [], difficulty: "basic" as const };
 
 function addJapanese(output: string, setState: React.Dispatch<React.SetStateAction<State>>) {
   translateToJapanese(output)
@@ -22,25 +24,19 @@ function addJapanese(output: string, setState: React.Dispatch<React.SetStateActi
     .catch(console.error);
 }
 
-function saveRecord(input: string, output: string) {
-  const id = randomUUID();
-  const created_at = new Date().toISOString();
-
+function runAnalysis(recordId: string, input: string, output: string) {
   analyzeInBackground("correction", input, output)
     .then((analysis) => {
-      const record: LearningRecord = { id, type: "correction", input, output, analysis, created_at, review_count: 0 };
-      appendRecord(record).catch(console.error);
+      updateRecord(recordId, { analysis }).catch(console.error);
       updateCategories(analysis.categories).catch(console.error);
     })
-    .catch(() => {
-      const fallback: LearningRecord = { id, type: "correction", input, output, analysis: { sentences: [], categories: [], difficulty: "basic" }, created_at, review_count: 0 };
-      appendRecord(fallback).catch(console.error);
-    });
+    .catch(console.error);
 }
 
 export default function CorrectCommand() {
   const [state, setState] = useState<State>({ mode: "loading" });
   const launched = useRef(false);
+  const recordId = useRef(randomUUID());
 
   useEffect(() => {
     if (launched.current) return;
@@ -53,6 +49,10 @@ export default function CorrectCommand() {
         // no selection
       }
       if (input) {
+        // Save immediately with input only
+        const record: LearningRecord = { id: recordId.current, type: "correction", input, output: "", analysis: emptyAnalysis, created_at: new Date().toISOString(), review_count: 0 };
+        appendRecord(record).catch(console.error);
+
         const toast = await showToast({ style: Toast.Style.Animated, title: "Correcting..." });
         try {
           const { result: output } = await callFast("correction", input);
@@ -60,7 +60,8 @@ export default function CorrectCommand() {
           setState({ mode: "result", input, markdown: output, output });
           toast.style = Toast.Style.Success;
           toast.title = "Corrected & copied";
-          saveRecord(input, output);
+          updateRecord(recordId.current, { output }).catch(console.error);
+          runAnalysis(recordId.current, input, output);
           addJapanese(output, setState);
         } catch (error) {
           toast.style = Toast.Style.Failure;
@@ -90,6 +91,10 @@ export default function CorrectCommand() {
                   return;
                 }
                 const input = values.input.trim();
+                recordId.current = randomUUID();
+                const record: LearningRecord = { id: recordId.current, type: "correction", input, output: "", analysis: emptyAnalysis, created_at: new Date().toISOString(), review_count: 0 };
+                appendRecord(record).catch(console.error);
+
                 const toast = await showToast({ style: Toast.Style.Animated, title: "Correcting..." });
                 try {
                   const { result: output } = await callFast("correction", input);
@@ -97,7 +102,8 @@ export default function CorrectCommand() {
                   setState({ mode: "result", input, markdown: output, output });
                   toast.style = Toast.Style.Success;
                   toast.title = "Corrected & copied";
-                  saveRecord(input, output);
+                  updateRecord(recordId.current, { output }).catch(console.error);
+                  runAnalysis(recordId.current, input, output);
                   addJapanese(output, setState);
                 } catch (error) {
                   toast.style = Toast.Style.Failure;
@@ -133,7 +139,8 @@ export default function CorrectCommand() {
                   setState({ mode: "result", input: state.input, markdown: newOutput, output: newOutput });
                   toast.style = Toast.Style.Success;
                   toast.title = "Revised & copied";
-                  saveRecord(state.input, newOutput);
+                  updateRecord(recordId.current, { output: newOutput }).catch(console.error);
+                  runAnalysis(recordId.current, state.input, newOutput);
                   addJapanese(newOutput, setState);
                 } catch (error) {
                   toast.style = Toast.Style.Failure;

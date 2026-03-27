@@ -69,18 +69,39 @@
       });
     });
 
-    // Card-level collapse/expand (click header)
-    document.querySelectorAll('.record-header').forEach(header => {
-      header.addEventListener('click', () => {
-        const card = header.closest('.record-card');
-        const wasExpanded = !card.classList.contains('collapsed');
-        card.classList.toggle('collapsed');
+    // Card-level collapse/expand
+    function toggleCard(card) {
+      const wasExpanded = !card.classList.contains('collapsed');
+      card.classList.toggle('collapsed');
+      if (wasExpanded) {
+        markAsRead(card.dataset.id);
+        card.classList.add('read');
+      }
+    }
 
-        // Collapsing → mark as read
-        if (wasExpanded) {
-          markAsRead(card.dataset.id);
-          card.classList.add('read');
-        }
+    document.querySelectorAll('.record-header').forEach(header => {
+      header.addEventListener('click', () => toggleCard(header.closest('.record-card')));
+    });
+
+    // Left border area click
+    document.querySelectorAll('.record-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.offsetX <= 28) toggleCard(card);
+      });
+    });
+
+    // Idiom click-to-copy
+    document.querySelectorAll('.idiom-chip').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idiom = chip.dataset.idiom;
+        const original = chip.dataset.original;
+        navigator.clipboard.writeText(idiom + ' - ' + original).then(() => {
+          chip.classList.add('copied');
+          const prev = chip.textContent;
+          chip.textContent = 'Copied!';
+          setTimeout(() => { chip.textContent = prev; chip.classList.remove('copied'); }, 1500);
+        });
       });
     });
 
