@@ -41,7 +41,7 @@ export default function ConfirmCommand() {
 
                 await Clipboard.copy(output);
 
-                const markdown = `## Confirmation\n\n**Expression:** ${values.input}\n\n---\n\n${output}`;
+                const markdown = output;
                 setResult({ markdown, output });
 
                 toast.style = Toast.Style.Success;

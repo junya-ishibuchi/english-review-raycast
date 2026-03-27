@@ -41,7 +41,7 @@ export default function TranslateCommand() {
 
                 await Clipboard.copy(output);
 
-                const markdown = `## Translation\n\n**Input:** ${values.input}\n\n**English:** ${output}`;
+                const markdown = output;
                 setResult({ markdown, output });
 
                 toast.style = Toast.Style.Success;

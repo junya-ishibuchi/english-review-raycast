@@ -41,7 +41,7 @@ export default function CorrectCommand() {
 
                 await Clipboard.copy(output);
 
-                const markdown = `## Correction\n\n**Original:** ${values.input}\n\n**Corrected:** ${output}`;
+                const markdown = output;
                 setResult({ markdown, output });
 
                 toast.style = Toast.Style.Success;
