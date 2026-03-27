@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Review – {{weekLabel}}</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Weekly Review</h1>
+    <p class="subtitle">{{weekLabel}}</p>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="number">{{totalCount}}</div>
+        <div class="label">Total Records</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">{{uniqueCategories}}</div>
+        <div class="label">Categories</div>
+      </div>
+    </div>
+
+    <div class="section-title">Category Breakdown</div>
+    <div class="bar-chart">
+      {{categoryBars}}
+    </div>
+
+    <div class="section-title">Repeated Mistakes</div>
+    <div class="top-mistakes">
+      {{topMistakes}}
+    </div>
+
+    <div class="section-title">All Records</div>
+
+    {{records}}
+  </div>
+</body>
+</html>
