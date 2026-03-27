@@ -1,12 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { getPreferenceValues } from "@raycast/api";
+import { AI } from "@raycast/api";
 import { RecordType, Analysis } from "./types";
-import { getSystemPrompt, getUserPrompt } from "./prompts";
-
-interface Preferences {
-  anthropicApiKey: string;
-  claudeModel: string;
-}
+import { buildPrompt } from "./prompts";
 
 interface ClaudeResponse {
   result: string;
@@ -14,26 +8,12 @@ interface ClaudeResponse {
 }
 
 export async function callClaude(type: RecordType, input: string): Promise<ClaudeResponse> {
-  const { anthropicApiKey, claudeModel } = getPreferenceValues<Preferences>();
+  const prompt = buildPrompt(type, input);
 
-  const client = new Anthropic({ apiKey: anthropicApiKey });
-
-  const message = await client.messages.create({
-    model: claudeModel,
-    max_tokens: 1024,
-    system: getSystemPrompt(type),
-    messages: [
-      {
-        role: "user",
-        content: getUserPrompt(type, input),
-      },
-    ],
+  const text = await AI.ask(prompt, {
+    model: AI.Model["Anthropic_Claude_Haiku"],
+    creativity: "low",
   });
-
-  const text = message.content
-    .filter((block): block is Anthropic.TextBlock => block.type === "text")
-    .map((block) => block.text)
-    .join("");
 
   const parsed = JSON.parse(text) as ClaudeResponse;
   return parsed;
